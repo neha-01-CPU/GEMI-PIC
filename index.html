@@ -22,9 +22,9 @@
 
       <div class="section-block">
         <div class="avatar-picker">
-          <button class="av-arrow" id="btn-av-prev">&#8249;</button>
+          <button class="av-arrow glow-shake" id="btn-av-prev">&#8249;</button>
           <div class="av-frame glass" id="av-frame"><canvas id="av-canvas" width="96" height="96"></canvas></div>
-          <button class="av-arrow" id="btn-av-next">&#8250;</button>
+          <button class="av-arrow glow-shake" id="btn-av-next">&#8250;</button>
         </div>
         <div class="av-dots" id="av-dots"></div>
       </div>
@@ -79,6 +79,94 @@
       </header>
 
       <div class="canvas-wrap glass" id="canvas-wrap">
+        <canvas id="game-canvas"></canvas>
+        <div class="rating-ui glass">
+          <button class="rate-btn">👍</button>
+          <button class="rate-btn">👎</button>
+        </div>
+
+        <div class="overlay waiting-overlay glass hidden" id="overlay-waiting">
+          <div class="overlay-inner"><div class="wait-spinner">⏳</div><h3>Waiting for players...</h3></div>
+        </div>
+        <div class="overlay word-select-overlay hidden" id="overlay-word-select">
+          <div class="ws-inner">
+            <div class="ws-header"><h2>Choose a word!</h2><p><span id="ws-timer">15</span>s</p></div>
+            <div class="ws-cards" id="ws-cards"></div>
+          </div>
+        </div>
+        <div class="overlay round-end-overlay hidden" id="overlay-round-end">
+          <div class="re-inner glass-strong">
+            <h2 id="re-title">Round Over!</h2><p>The word was: <strong id="re-word-val">—</strong></p>
+            <div class="re-scores" id="re-scores"></div><div id="re-countdown">5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar glass" id="toolbar">
+        <button class="tool-btn active" id="tool-pencil" data-tool="pencil">✏️</button>
+        
+        <div class="tool-popup-wrap">
+          <button class="tool-btn" id="btn-color-popup"><div class="color-indicator" id="color-indicator" style="background:#000;"></div></button>
+          <div class="tool-popup glass-strong hidden" id="popup-color">
+            <div class="color-grid" id="color-palette"></div>
+            <input type="color" id="color-picker" value="#000000" />
+          </div>
+        </div>
+        
+        <div class="tool-popup-wrap">
+          <button class="tool-btn" id="btn-size-popup">⭕</button>
+          <div class="tool-popup glass-strong hidden" id="popup-size">
+            <span class="size-label" id="size-val-txt">3px</span>
+            <input type="range" class="size-slider" id="size-slider" min="1" max="40" value="3" />
+          </div>
+        </div>
+        
+        <button class="tool-btn" id="tool-fill" data-tool="fill">🪣</button>
+        <button class="tool-btn" id="tool-eraser" data-tool="eraser">🧽</button>
+        <button class="tool-btn" id="tool-undo">↩️</button>
+        <button class="tool-btn" id="tool-clear">🗑️</button>
+      </div>
+    </div>
+
+    <div class="grid-middle">
+      <aside class="panel leaderboard-panel glass" id="leaderboard-panel">
+        <ul class="player-list" id="player-list"></ul>
+      </aside>
+      <aside class="panel chat-panel glass" id="chat-panel">
+        <div class="chat-messages" id="chat-messages"></div>
+      </aside>
+    </div>
+
+    <div class="grid-bottom">
+      <div class="footer-input-wrap glass-strong">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Type your guess..." autocomplete="off" spellcheck="false" />
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  
+  <div class="context-menu glass-strong hidden" id="context-menu">
+    <div class="ctx-head" id="ctx-head"><div class="ctx-av" id="ctx-av"></div><div><div class="ctx-name" id="ctx-name">Player</div></div></div>
+    <button class="ctx-btn ctx-danger" id="ctx-kick">Kick Player</button>
+    <button class="ctx-btn" id="ctx-mute">Mute</button>
+    <button class="ctx-btn ctx-close" id="ctx-close">Cancel</button>
+  </div>
+  
+  <div class="overlay podium-overlay hidden" id="overlay-podium">
+    <div class="podium-inner glass-strong">
+      <h2>Game Over!</h2>
+      <div class="podium-stand" id="podium-stand"></div>
+      <button class="btn-primary glow-shake" onclick="location.reload()" style="margin-top: 15px;">Play Again</button>
+    </div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <script src="script.js"></script>
+</body>
+</html>
         <canvas id="game-canvas"></canvas>
         <div class="rating-ui glass">
           <button class="rate-btn">👍</button>

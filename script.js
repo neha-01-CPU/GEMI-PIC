@@ -1,7 +1,4 @@
-/* ================================================================
-   PICAZO V8 FINAL — script.js
-   Pure HD Canvas · Skribbl.io Engine · Bouncy Popups
-================================================================ */
+/* PICAZO V8 FINAL — script.js */
 'use strict';
 
 const $ = id => document.getElementById(id);
@@ -24,15 +21,13 @@ const AVATAR_DEFS = [
   {name:'Jordan', skin:'#c8884a', hair:'#2a1808', hCol:'#1a0a00', style:'m-spec', accent:'#f4b942'}
 ];
 
-const CIRC = 2 * Math.PI * 25;
-
 /* ── AVATAR RENDERER ── */
 function drawAvatar(canvas, def, size = 96) {
-  if (!canvas) return;
   const c = canvas.getContext('2d');
   const W = size, H = size;
   c.clearRect(0, 0, W, H);
 
+  // Background
   const bg = c.createLinearGradient(0, 0, W, H);
   bg.addColorStop(0, def.accent + '55'); bg.addColorStop(1, def.accent + '22');
   c.fillStyle = bg;
@@ -40,14 +35,19 @@ function drawAvatar(canvas, def, size = 96) {
 
   const cx = W / 2, cy = H / 2, headR = W * 0.22, headY = H * 0.4;
   
+  // Body
   c.fillStyle = def.accent; c.beginPath(); c.ellipse(cx, H * 0.88, W * 0.28, H * 0.22, 0, 0, Math.PI * 2); c.fill();
+  // Neck
   c.fillStyle = def.skin; c.fillRect(cx - W * 0.065, headY + headR * 0.8, W * 0.13, H * 0.1);
+  // Head
   c.fillStyle = def.skin; c.beginPath(); c.ellipse(cx, headY, headR, headR * 1.1, 0, 0, Math.PI * 2); c.fill();
   
+  // Hair
   c.fillStyle = def.hCol;
   if(def.style.includes('long')) { c.beginPath(); c.ellipse(cx, headY + headR * 0.6, headR * 1.15, headR * 1.5, 0, 0, Math.PI * 2); c.fill(); }
   c.beginPath(); c.ellipse(cx, headY - headR * 0.65, headR * 1.0, headR * 0.55, 0, Math.PI, Math.PI * 2); c.fill();
 
+  // Eyes
   const eyeY = headY - headR * 0.08, eyeOffX = headR * 0.42;
   [-1,1].forEach(side => {
     c.fillStyle = '#fff'; c.beginPath(); c.ellipse(cx + side * eyeOffX, eyeY, headR * 0.2, headR * 0.24, 0, 0, Math.PI * 2); c.fill();
@@ -68,7 +68,7 @@ function setAvatar(i) {
   if (dots.length > 0) dots.forEach((d, j) => d.classList.toggle('active', j === S.avatarIdx));
 }
 
-/* ── UI INITIALIZATION & LOBBY ── */
+/* ── UI INITIALIZATION ── */
 $('btn-av-prev').onclick = () => setAvatar(S.avatarIdx - 1);
 $('btn-av-next').onclick = () => setAvatar(S.avatarIdx + 1);
 
@@ -98,11 +98,7 @@ function joinGame(isPrivate) {
 
 /* ── GAME ENGINE ── */
 function initGame() {
-  buildPlayers(); 
-  buildLeaderboard(); 
-  buildToolbar(); 
-  initCanvas();
-  
+  buildPlayers(); buildLeaderboard(); buildToolbar(); initCanvas();
   $('chat-input').onkeydown = e => { if (e.key === 'Enter') handleGuess($('chat-input').value); };
   popToast('👋 Joined the room!');
   startRound();
@@ -117,7 +113,7 @@ function buildPlayers() {
 
 function buildLeaderboard() {
   $('player-list').innerHTML = [...S.players].sort((a,b)=>b.score-a.score).map((p, i) => {
-    const c = document.createElement('canvas'); c.width = 28; c.height = 28; drawAvatar(c, p.avatarDef, 28);
+    const c = document.createElement('canvas'); c.width = 32; c.height = 32; drawAvatar(c, p.avatarDef, 32);
     return `<li class="player-item ${p.id === S.players[S.drawerIdx].id ? 'drawing' : ''} ${p.guessed ? 'guessed' : ''}">
       <div class="pi-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
       <div class="pi-av"><img src="${c.toDataURL()}" style="width:100%;height:100%"></div>
@@ -137,7 +133,6 @@ function startRound() {
   $('overlay-word-select').classList.remove('hidden');
   const choices = WORDS.sort(()=>Math.random()-0.5).slice(0,3);
   $('ws-cards').innerHTML = choices.map(w => `<button class="ws-card" onclick="if(S.isDrawer) pickWord('${w}')">${S.isDrawer?w:'???'}</button>`).join('');
-  
   if(!S.isDrawer) setTimeout(() => pickWord(choices[0]), 3000);
 }
 
@@ -145,9 +140,7 @@ function pickWord(w) {
   $('overlay-word-select').classList.add('hidden');
   S.currentWord = w; S.revealedIdx = [];
   popToast(`🖌️ ${S.players[S.drawerIdx].name} is drawing!`);
-  renderWord(); 
-  startTimer(); 
-  scheduleBots();
+  renderWord(); startTimer(); scheduleBots();
 }
 
 function renderWord() {
@@ -164,10 +157,8 @@ function startTimer() {
     S.timeLeft--;
     $('timer-num').textContent = S.timeLeft;
     $('t-fg').style.strokeDashoffset = CIRC * (1 - (S.timeLeft/S.drawTime));
-    
     if(!S.isDrawer && S.timeLeft === Math.floor(S.drawTime*0.5)) revealHint();
     if(!S.isDrawer && S.timeLeft === Math.floor(S.drawTime*0.25)) revealHint();
-    
     if(S.timeLeft <= 0) endTurn(false);
   }, 1000);
 }
@@ -180,12 +171,7 @@ function revealHint() {
 /* ── CHAT ENGINE ── */
 function handleGuess(val) {
   val = val.trim(); if(!val) return; $('chat-input').value = '';
-  
-  if(S.isDrawer || S.guessedIds.has(S.myId)) { 
-    appendChat('msg-normal', `<b>${S.playerName}:</b> ${escHtml(val)}`); 
-    return; 
-  }
-  
+  if(S.isDrawer || S.guessedIds.has(S.myId)) { appendChat('msg-normal', `<b>${S.playerName}:</b> ${val}`); return; }
   const guess = val.toLowerCase(); const ans = S.currentWord.toLowerCase();
   
   if(guess === ans) {
@@ -195,9 +181,9 @@ function handleGuess(val) {
     buildLeaderboard();
     if(S.players.filter(p=>!p.isDrawer).every(p=>p.guessed)) endTurn(true);
   } else if (guess.length === ans.length && guess.split('').filter((c,i)=>c!==ans[i]).length === 1) {
-    appendChat('msg-close', `'${escHtml(val)}' is very close!`);
+    appendChat('msg-close', `'${val}' is very close!`);
   } else {
-    appendChat('msg-normal', `<b>${S.playerName}:</b> ${escHtml(val)}`);
+    appendChat('msg-normal', `<b>${S.playerName}:</b> ${val}`);
   }
 }
 
@@ -218,7 +204,7 @@ function endTurn(allGuessed) {
   clearInterval(S.timerInt);
   $('overlay-round-end').classList.remove('hidden');
   $('re-word-val').textContent = S.currentWord;
-  $('re-scores').innerHTML = S.players.map(p => `<div class="re-score-row"><span>${p.name}</span><span>+${p.score} pts</span></div>`).join('');
+  $('re-scores').innerHTML = S.players.map(p => `<div class="re-score-row"><span>${p.name}</span><span>${p.score} pts</span></div>`).join('');
   
   setTimeout(() => {
     $('overlay-round-end').classList.add('hidden');
@@ -253,87 +239,23 @@ function scheduleBots() {
 /* ── CANVAS & TOOLBAR ── */
 function initCanvas() {
   const c = $('game-canvas'); const ctx = c.getContext('2d', { willReadFrequently: true });
-  
   const resize = () => {
     const r = $('canvas-wrap').getBoundingClientRect();
-    if(r.width === 0 || r.height === 0) return;
-    
-    let snap = null;
-    if (c.width > 0) { try { snap = ctx.getImageData(0, 0, c.width, c.height); } catch(e){} }
-    
     c.width = r.width * S.dpr; c.height = r.height * S.dpr;
     ctx.scale(S.dpr, S.dpr); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    
-    if (snap) {
-      const temp = document.createElement('canvas'); temp.width = snap.width; temp.height = snap.height;
-      temp.getContext('2d').putImageData(snap, 0, 0); ctx.drawImage(temp, 0, 0, r.width, r.height);
-    }
   };
   window.addEventListener('resize', resize); resize();
 
-  const getPos = (e) => {
-    const r = c.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
-  };
-
-  c.onpointerdown = e => { 
-    if(S.isDrawer) { 
-      c.setPointerCapture(e.pointerId); S.isDrawing=true; 
-      const pos = getPos(e);
-      if(S.tool === 'fill') { floodFill(pos.x, pos.y, S.color); S.isDrawing=false; return; }
-      ctx.beginPath(); ctx.moveTo(pos.x, pos.y); 
-    }
-  };
-  
+  c.onpointerdown = e => { if(S.isDrawer) { c.setPointerCapture(e.pointerId); S.isDrawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX,e.offsetY); }};
   c.onpointermove = e => { 
     if(S.isDrawer && S.isDrawing) { 
-      const pos = getPos(e);
-      ctx.lineTo(pos.x, pos.y); 
+      ctx.lineTo(e.offsetX, e.offsetY); 
       ctx.strokeStyle = S.tool === 'eraser' ? '#ffffff' : S.color; 
       ctx.lineWidth = S.size; 
-      ctx.globalCompositeOperation = S.tool === 'eraser' ? 'destination-out' : 'source-over';
       ctx.stroke(); 
     }
   };
-  
-  c.onpointerup = e => { 
-    if(S.isDrawer) { 
-      S.isDrawing=false; ctx.closePath(); c.releasePointerCapture(e.pointerId); 
-      ctx.globalCompositeOperation = 'source-over';
-      try { S.strokes.push(ctx.getImageData(0,0,c.width,c.height)); } catch(err){}
-    }
-  };
-}
-
-function floodFill(startX, startY, fillHex) {
-  const c = $('game-canvas'); const ctx = c.getContext('2d');
-  const w = c.width, h = c.height;
-  const id = ctx.getImageData(0, 0, w, h); const d = id.data;
-  const xi = Math.round(startX * S.dpr), yi = Math.round(startY * S.dpr);
-  if (xi < 0 || xi >= w || yi < 0 || yi >= h) return;
-
-  const idx = (yi * w + xi) * 4;
-  const tr = d[idx], tg = d[idx+1], tb = d[idx+2], ta = d[idx+3];
-
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fillHex);
-  const fc = r ? { r: parseInt(r[1],16), g: parseInt(r[2],16), b: parseInt(r[3],16) } : null;
-  if (!fc || (tr === fc.r && tg === fc.g && tb === fc.b && ta === 255)) return;
-
-  function match(i) { return Math.abs(d[i]-tr)<30 && Math.abs(d[i+1]-tg)<30 && Math.abs(d[i+2]-tb)<30 && Math.abs(d[i+3]-ta)<30; }
-
-  const stack = [xi + yi * w]; const seen = new Uint8Array(w * h);
-  while (stack.length) {
-    const p = stack.pop(); if (seen[p]) continue;
-    const x = p % w, y = Math.floor(p / w);
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
-    const i = p * 4; if (!match(i)) continue;
-    seen[p] = 1;
-    d[i] = fc.r; d[i+1] = fc.g; d[i+2] = fc.b; d[i+3] = 255;
-    if (x+1 < w) stack.push(p+1); if (x-1 >= 0) stack.push(p-1);
-    if (y+1 < h) stack.push(p+w); if (y-1 >= 0) stack.push(p-w);
-  }
-  ctx.putImageData(id, 0, 0);
-  try { S.strokes.push(ctx.getImageData(0,0,w,h)); } catch(err){}
+  c.onpointerup = e => { if(S.isDrawer) { S.isDrawing=false; ctx.closePath(); c.releasePointerCapture(e.pointerId); S.strokes.push(ctx.getImageData(0,0,c.width,c.height)); }};
 }
 
 function buildToolbar() {
@@ -341,24 +263,16 @@ function buildToolbar() {
     const btn = $('tool-' + t);
     if(btn) btn.onclick = () => { 
       S.tool = t; 
-      document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active')); 
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active')); 
       btn.classList.add('active'); 
     };
   });
   
-  $('tool-clear').onclick = () => {
-    $('game-canvas').getContext('2d').clearRect(0,0,9999,9999);
-    S.strokes = [];
-  };
-  
+  $('tool-clear').onclick = () => $('game-canvas').getContext('2d').clearRect(0,0,9999,9999);
   $('tool-undo').onclick = () => {
     const ctx = $('game-canvas').getContext('2d');
-    if(S.strokes.length > 1) { 
-      S.strokes.pop(); 
-      ctx.putImageData(S.strokes[S.strokes.length-1], 0, 0); 
-    } else { 
-      ctx.clearRect(0,0,9999,9999); S.strokes = []; 
-    }
+    if(S.strokes.length > 1) { S.strokes.pop(); ctx.putImageData(S.strokes[S.strokes.length-1], 0, 0); }
+    else { ctx.clearRect(0,0,9999,9999); S.strokes = []; }
   };
   
   $('btn-color-popup').onclick = e => { e.stopPropagation(); $('popup-color').classList.toggle('hidden'); $('popup-size').classList.add('hidden'); };
@@ -373,8 +287,6 @@ function buildToolbar() {
   $('size-slider').oninput = e => { S.size = +e.target.value; $('size-val-txt').textContent = S.size+'px'; };
 }
 
-function escHtml(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]); }
-
 /* ── CONFETTI HTML5 ── */
 function fireConfetti() {
   const canvas = $('confetti-canvas'); const ctx = canvas.getContext('2d');
@@ -388,6 +300,6 @@ function fireConfetti() {
   render();
 }
 
-// Initialize setup
+// Initial Call
 buildAvDots();
 setAvatar(0);

@@ -15,7 +15,6 @@
 
   <div id="screen-lobby" class="screen active">
     <div class="lobby-card glass-strong">
-      
       <div class="lobby-header">
         <h1 class="logo-text">Picazo</h1>
         <p class="tagline">Sketch It. Guess It. Win It.</p>
@@ -23,11 +22,9 @@
 
       <div class="section-block">
         <div class="avatar-picker">
-          <button class="av-arrow glow-shake" id="btn-av-prev">&#8249;</button>
-          <div class="av-frame glass" id="av-frame">
-            <canvas id="av-canvas" width="96" height="96"></canvas>
-          </div>
-          <button class="av-arrow glow-shake" id="btn-av-next">&#8250;</button>
+          <button class="av-arrow" id="btn-av-prev">&#8249;</button>
+          <div class="av-frame glass" id="av-frame"><canvas id="av-canvas" width="96" height="96"></canvas></div>
+          <button class="av-arrow" id="btn-av-next">&#8250;</button>
         </div>
         <div class="av-dots" id="av-dots"></div>
       </div>
@@ -40,7 +37,6 @@
         <button class="btn-primary glow-shake" id="btn-play">▶ Play Now</button>
         <button class="btn-secondary glow-shake" id="btn-private">Create Private Room</button>
       </div>
-
     </div>
   </div>
 
@@ -48,38 +44,10 @@
     <div class="modal-content glass-strong">
       <h2>Room Settings</h2>
       <div class="settings-grid">
-        <div class="setting-group">
-          <label>Rounds</label>
-          <select id="sel-rounds" class="select-input">
-            <option value="3" selected>3</option>
-            <option value="5">5</option>
-            <option value="8">8</option>
-          </select>
-        </div>
-        <div class="setting-group">
-          <label>Players</label>
-          <select id="sel-bots" class="select-input">
-            <option value="2">2</option>
-            <option value="4">4</option>
-            <option value="8" selected>8</option>
-          </select>
-        </div>
-        <div class="setting-group">
-          <label>Draw Time</label>
-          <select id="sel-time" class="select-input">
-            <option value="60">60s</option>
-            <option value="100" selected>100s</option>
-            <option value="120">120s</option>
-          </select>
-        </div>
-        <div class="setting-group">
-          <label>Hints</label>
-          <select id="sel-hints" class="select-input">
-            <option value="low">Low</option>
-            <option value="normal" selected>Normal</option>
-            <option value="high">High</option>
-          </select>
-        </div>
+        <div class="setting-group"><label>Rounds</label><select id="sel-rounds" class="select-input"><option value="3" selected>3</option><option value="5">5</option><option value="8">8</option></select></div>
+        <div class="setting-group"><label>Players</label><select id="sel-bots" class="select-input"><option value="2">2</option><option value="4">4</option><option value="8" selected>8</option></select></div>
+        <div class="setting-group"><label>Draw Time</label><select id="sel-time" class="select-input"><option value="60">60s</option><option value="100" selected>100s</option><option value="120">120s</option></select></div>
+        <div class="setting-group"><label>Hints</label><select id="sel-hints" class="select-input"><option value="low">Low</option><option value="normal" selected>Normal</option><option value="high">High</option></select></div>
       </div>
       <div class="setting-group full">
         <label>Custom Words (comma separated)</label>
@@ -96,10 +64,7 @@
       <header class="game-header glass">
         <div class="hdr-timer-zone">
           <div class="timer-ring-wrap">
-            <svg class="timer-svg" viewBox="0 0 60 60">
-              <circle class="t-bg" cx="30" cy="30" r="25"/>
-              <circle class="t-fg" id="t-fg" cx="30" cy="30" r="25" stroke-dasharray="157.08"/>
-            </svg>
+            <svg class="timer-svg" viewBox="0 0 60 60"><circle class="t-bg" cx="30" cy="30" r="25"/><circle class="t-fg" id="t-fg" cx="30" cy="30" r="25" stroke-dasharray="157.08"/></svg>
             <span class="timer-num" id="timer-num">100</span>
           </div>
           <span class="round-badge" id="round-badge">Round 1/3</span>
@@ -110,42 +75,29 @@
           <div class="word-meta" id="word-meta"></div>
         </div>
         
-        <div class="hdr-right">
-          <button class="icon-btn" id="btn-mute">🔊</button>
-        </div>
+        <div class="hdr-right"><button class="icon-btn" id="btn-mute">🔊</button></div>
       </header>
 
       <div class="canvas-wrap glass" id="canvas-wrap">
         <canvas id="game-canvas"></canvas>
-        
         <div class="rating-ui glass">
           <button class="rate-btn">👍</button>
           <button class="rate-btn">👎</button>
         </div>
 
         <div class="overlay waiting-overlay glass hidden" id="overlay-waiting">
-          <div class="overlay-inner">
-            <div class="wait-spinner">⏳</div>
-            <h3>Waiting for players...</h3>
-          </div>
+          <div class="overlay-inner"><div class="wait-spinner">⏳</div><h3>Waiting for players...</h3></div>
         </div>
-        
         <div class="overlay word-select-overlay hidden" id="overlay-word-select">
           <div class="ws-inner">
-            <div class="ws-header">
-              <h2>Choose a word!</h2>
-              <p><span id="ws-timer">15</span>s</p>
-            </div>
+            <div class="ws-header"><h2>Choose a word!</h2><p><span id="ws-timer">15</span>s</p></div>
             <div class="ws-cards" id="ws-cards"></div>
           </div>
         </div>
-        
         <div class="overlay round-end-overlay hidden" id="overlay-round-end">
           <div class="re-inner glass-strong">
-            <h2 id="re-title">Round Over!</h2>
-            <p>The word was: <strong id="re-word-val">—</strong></p>
-            <div class="re-scores" id="re-scores"></div>
-            <div id="re-countdown">5</div>
+            <h2 id="re-title">Round Over!</h2><p>The word was: <strong id="re-word-val">—</strong></p>
+            <div class="re-scores" id="re-scores"></div><div id="re-countdown">5</div>
           </div>
         </div>
       </div>
@@ -154,9 +106,7 @@
         <button class="tool-btn active" id="tool-pencil" data-tool="pencil">✏️</button>
         
         <div class="tool-popup-wrap">
-          <button class="tool-btn" id="btn-color-popup">
-            <div class="color-indicator" id="color-indicator" style="background:#000;"></div>
-          </button>
+          <button class="tool-btn" id="btn-color-popup"><div class="color-indicator" id="color-indicator" style="background:#000;"></div></button>
           <div class="tool-popup glass-strong hidden" id="popup-color">
             <div class="color-grid" id="color-palette"></div>
             <input type="color" id="color-picker" value="#000000" />
@@ -182,7 +132,6 @@
       <aside class="panel leaderboard-panel glass" id="leaderboard-panel">
         <ul class="player-list" id="player-list"></ul>
       </aside>
-      
       <aside class="panel chat-panel glass" id="chat-panel">
         <div class="chat-messages" id="chat-messages"></div>
       </aside>
@@ -199,21 +148,12 @@
   <div class="toast-container" id="toast-container"></div>
   
   <div class="context-menu glass-strong hidden" id="context-menu">
-    <div class="ctx-head" id="ctx-head">
-      <div class="ctx-av" id="ctx-av"></div>
-      <div><div class="ctx-name" id="ctx-name">Player</div></div>
-    </div>
+    <div class="ctx-head" id="ctx-head"><div class="ctx-av" id="ctx-av"></div><div><div class="ctx-name" id="ctx-name">Player</div></div></div>
     <button class="ctx-btn ctx-danger" id="ctx-kick">Kick Player</button>
     <button class="ctx-btn" id="ctx-mute">Mute</button>
     <button class="ctx-btn ctx-close" id="ctx-close">Cancel</button>
   </div>
   
-  <div class="vote-banner glass-strong hidden" id="vote-banner">
-    <strong id="vote-title">Vote to kick?</strong>
-    <button class="vote-kick-btn glow-shake" id="btn-vote-yes">Kick</button>
-    <button class="vote-keep-btn" id="btn-vote-no">Keep</button>
-  </div>
-
   <div class="overlay podium-overlay hidden" id="overlay-podium">
     <div class="podium-inner glass-strong">
       <h2>Game Over!</h2>

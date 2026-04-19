@@ -152,7 +152,7 @@ html, body {
 .icon-btn:hover { background: #fff; transform: scale(1.1); }
 
 .canvas-wrap { flex: 1; border-radius: var(--radius); position: relative; min-height: 0; }
-#game-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; background: #fff;}
+#game-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
 .rating-ui { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; padding: 4px; border-radius: var(--radius-pill); }
 .rate-btn { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s; } 
 .rate-btn:hover { transform: scale(1.2); }
@@ -203,10 +203,6 @@ html, body {
   flex: 1; height: 100%; border: none; background: transparent; 
   font-family: var(--f-body); font-size: 0.95rem; font-weight: 700; color: var(--txt); outline: none; 
 }
-.guess-send-btn {
-  width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--blue); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 8px;
-}
-.guess-send-btn svg { width: 16px; height: 16px; }
 
 /* ================================================================
    POPUPS & OVERLAYS
@@ -227,8 +223,7 @@ html, body {
 .podium-stand h3 { font-size: 1.2rem; color: var(--indigo); }
 
 /* Toasts (Game Flow) */
-.sys-toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
 .toast { padding: 10px 20px; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 800; color: var(--txt); background: var(--glass-s); backdrop-filter: blur(20px); border: 1px solid var(--border); box-shadow: var(--shadow); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes popIn { from{opacity:0;transform:translateY(-20px) scale(0.9)} to{opacity:1;transform:translateY(0) scale(1)} }
 .toast.fade-out { opacity: 0; transform: translateY(-10px); transition: 0.3s; }
@@ -260,5 +255,4 @@ html, body {
   .grid-bottom { display: none; } 
   .leaderboard-panel { width: 220px; order: -1; height: 100%; }
   .chat-panel { width: 280px; height: 100%; }
-  .footer-input-wrap { display: none; } 
 }

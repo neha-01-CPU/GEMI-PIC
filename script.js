@@ -5,60 +5,54 @@
 'use strict';
 
 const $ = id => document.getElementById(id);
-
-// --- GLOBAL GAME STATE ---
 const S = {
   playerName: '', rounds: 3, drawTime: 100, maxPlayers: 8, hints: 'normal',
   players: [], myId: 'me', drawerIdx: 0, round: 1, currentWord: '',
   revealedIdx: [], guessedIds: new Set(),
   timeLeft: 100, timerInt: null, isDrawer: false, isDrawing: false,
-  tool: 'pencil', color: '#000000', size: 3, strokes: [], 
-  dpr: window.devicePixelRatio || 1, isMuted: false
+  tool: 'pencil', color: '#000000', size: 3, strokes: [], dpr: window.devicePixelRatio || 1
 };
 
-const WORDS = ['elephant','pizza','rainbow','submarine','telescope','butterfly','volcano','astronaut','octopus','galaxy','pyramid'];
+const WORDS = ['elephant','pizza','rainbow','submarine','telescope','butterfly','volcano','astronaut','octopus'];
 const COLORS = ['#000000','#ffffff','#c0c0c0','#808080','#ff0000','#ff6600','#ffcc00','#ffff00','#00cc00','#00ffcc','#0088ff','#0000ff','#8800ff','#ff00ff','#ff6699','#8b4513'];
 
-// Abstract Vector Avatars (Sunset/Twilight Aesthetic)
 const AVATAR_DEFS = [
-  { name: 'Alpha', bg: '#ff9a9e', shape: 'circle', eye: '#fff', detail: '#ff007f' },
-  { name: 'Beta',  bg: '#a18cd1', shape: 'rect',   eye: '#fff', detail: '#7f00ff' },
-  { name: 'Gamma', bg: '#fbc2eb', shape: 'tri',    eye: '#fff', detail: '#a18cd1' },
-  { name: 'Delta', bg: '#84fab0', shape: 'circle', eye: '#fff', detail: '#00ff7f' },
-  { name: 'Epsilon',bg:'#8fd3f4', shape: 'rect',   eye: '#fff', detail: '#007fff' }
+  {name:'Alex', skin:'#fdd09a', hair:'#3a2010', hCol:'#222', style:'m-short', accent:'#4a8fe8'},
+  {name:'Jamie', skin:'#f9c49a', hair:'#1a0a0a', hCol:'#111', style:'f-long', accent:'#9c5cf8'},
+  {name:'Morgan', skin:'#e8a87c', hair:'#6a3010', hCol:'#4a1a0a', style:'m-beard', accent:'#e87c4a'},
+  {name:'Taylor', skin:'#fdd8b0', hair:'#8b4513', hCol:'#5a2a0a', style:'f-bun', accent:'#4acf8a'},
+  {name:'Jordan', skin:'#c8884a', hair:'#2a1808', hCol:'#1a0a00', style:'m-spec', accent:'#f4b942'}
 ];
 
 const CIRC = 2 * Math.PI * 25;
 
-/* ================================================================
-   AVATAR RENDERER (Abstract Vectors)
-================================================================ */
+/* ── AVATAR RENDERER ── */
 function drawAvatar(canvas, def, size = 96) {
   if (!canvas) return;
   const c = canvas.getContext('2d');
   const W = size, H = size;
   c.clearRect(0, 0, W, H);
 
-  // Glass Background
   const bg = c.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, def.bg); bg.addColorStop(1, def.detail);
+  bg.addColorStop(0, def.accent + '55'); bg.addColorStop(1, def.accent + '22');
   c.fillStyle = bg;
   c.beginPath(); if(c.roundRect) c.roundRect(0, 0, W, H, W * 0.2); else c.rect(0,0,W,H); c.fill();
 
-  const cx = W / 2, cy = H / 2;
+  const cx = W / 2, cy = H / 2, headR = W * 0.22, headY = H * 0.4;
   
-  // Abstract Inner Shape
-  c.fillStyle = 'rgba(255,255,255,0.4)';
-  c.beginPath();
-  if (def.shape === 'circle') c.arc(cx, cy, W*0.25, 0, Math.PI*2);
-  else if (def.shape === 'rect') { if(c.roundRect) c.roundRect(cx - W*0.2, cy - W*0.2, W*0.4, W*0.4, 8); else c.rect(cx - W*0.2, cy - W*0.2, W*0.4, W*0.4); }
-  else if (def.shape === 'tri') { c.moveTo(cx, cy - W*0.25); c.lineTo(cx + W*0.25, cy + W*0.2); c.lineTo(cx - W*0.25, cy + W*0.2); }
-  c.fill();
+  c.fillStyle = def.accent; c.beginPath(); c.ellipse(cx, H * 0.88, W * 0.28, H * 0.22, 0, 0, Math.PI * 2); c.fill();
+  c.fillStyle = def.skin; c.fillRect(cx - W * 0.065, headY + headR * 0.8, W * 0.13, H * 0.1);
+  c.fillStyle = def.skin; c.beginPath(); c.ellipse(cx, headY, headR, headR * 1.1, 0, 0, Math.PI * 2); c.fill();
+  
+  c.fillStyle = def.hCol;
+  if(def.style.includes('long')) { c.beginPath(); c.ellipse(cx, headY + headR * 0.6, headR * 1.15, headR * 1.5, 0, 0, Math.PI * 2); c.fill(); }
+  c.beginPath(); c.ellipse(cx, headY - headR * 0.65, headR * 1.0, headR * 0.55, 0, Math.PI, Math.PI * 2); c.fill();
 
-  // Abstract "Eyes"
-  c.fillStyle = def.eye;
-  c.beginPath(); c.arc(cx - W*0.1, cy - W*0.05, W*0.05, 0, Math.PI*2); c.fill();
-  c.beginPath(); c.arc(cx + W*0.1, cy - W*0.05, W*0.05, 0, Math.PI*2); c.fill();
+  const eyeY = headY - headR * 0.08, eyeOffX = headR * 0.42;
+  [-1,1].forEach(side => {
+    c.fillStyle = '#fff'; c.beginPath(); c.ellipse(cx + side * eyeOffX, eyeY, headR * 0.2, headR * 0.24, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = def.hCol; c.beginPath(); c.arc(cx + side * eyeOffX, eyeY + 1, headR * 0.13, 0, Math.PI * 2); c.fill();
+  });
 }
 
 function buildAvDots() {
@@ -67,16 +61,14 @@ function buildAvDots() {
   container.innerHTML = AVATAR_DEFS.map((_, i) => `<button class="av-dot ${i === S.avatarIdx ? 'active' : ''}" onclick="setAvatar(${i})"></button>`).join('');
 }
 
-window.setAvatar = function(i) {
+function setAvatar(i) {
   S.avatarIdx = ((i % AVATAR_DEFS.length) + AVATAR_DEFS.length) % AVATAR_DEFS.length;
   drawAvatar($('av-canvas'), AVATAR_DEFS[S.avatarIdx], 96);
   const dots = $('av-dots').querySelectorAll('.av-dot');
   if (dots.length > 0) dots.forEach((d, j) => d.classList.toggle('active', j === S.avatarIdx));
 }
 
-/* ================================================================
-   UI INITIALIZATION & LOBBY FLOW
-================================================================ */
+/* ── UI INITIALIZATION & LOBBY ── */
 $('btn-av-prev').onclick = () => setAvatar(S.avatarIdx - 1);
 $('btn-av-next').onclick = () => setAvatar(S.avatarIdx + 1);
 
@@ -89,7 +81,7 @@ function joinGame(isPrivate) {
   const name = $('inp-name').value.trim();
   if(!name) {
     $('inp-name').classList.add('shake'); 
-    setTimeout(() => $('inp-name').classList.remove('shake'), 400); 
+    setTimeout(() => $('inp-name').classList.remove('shake'), 500); 
     return;
   }
   S.playerName = name;
@@ -104,31 +96,16 @@ function joinGame(isPrivate) {
   initGame();
 }
 
-/* ================================================================
-   CORE GAME ENGINE
-================================================================ */
+/* ── GAME ENGINE ── */
 function initGame() {
   buildPlayers(); 
   buildLeaderboard(); 
   buildToolbar(); 
   initCanvas();
-  setupInteractions();
   
-  sysToast('👋 Joined the room!');
+  $('chat-input').onkeydown = e => { if (e.key === 'Enter') handleGuess($('chat-input').value); };
+  popToast('👋 Joined the room!');
   startRound();
-}
-
-function setupInteractions() {
-  $('chat-input').onkeydown = e => { if (e.key === 'Enter') handleGuess(); };
-  $('btn-guess-send').onclick = () => handleGuess();
-  
-  $('btn-mute').onclick = () => {
-    S.isMuted = !S.isMuted;
-    $('btn-mute').textContent = S.isMuted ? '🔇' : '🔊';
-  };
-
-  $('btn-rate-up').onclick = () => sysToast('👍 You liked this drawing!');
-  $('btn-rate-down').onclick = () => sysToast('👎 You disliked this drawing!');
 }
 
 function buildPlayers() {
@@ -141,7 +118,7 @@ function buildPlayers() {
 function buildLeaderboard() {
   $('player-list').innerHTML = [...S.players].sort((a,b)=>b.score-a.score).map((p, i) => {
     const c = document.createElement('canvas'); c.width = 28; c.height = 28; drawAvatar(c, p.avatarDef, 28);
-    return `<li class="player-item ${p.id === S.players[S.drawerIdx].id ? 'drawing' : ''} ${p.guessed ? 'guessed' : ''}" onclick="if(!${p.isSelf}) openContext('${p.id}')">
+    return `<li class="player-item ${p.id === S.players[S.drawerIdx].id ? 'drawing' : ''} ${p.guessed ? 'guessed' : ''}">
       <div class="pi-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
       <div class="pi-av"><img src="${c.toDataURL()}" style="width:100%;height:100%"></div>
       <div class="pi-name">${p.name}</div>
@@ -167,7 +144,7 @@ function startRound() {
 function pickWord(w) {
   $('overlay-word-select').classList.add('hidden');
   S.currentWord = w; S.revealedIdx = [];
-  sysToast(`🖌️ ${S.players[S.drawerIdx].name} is drawing!`);
+  popToast(`🖌️ ${S.players[S.drawerIdx].name} is drawing!`);
   renderWord(); 
   startTimer(); 
   scheduleBots();
@@ -178,30 +155,15 @@ function renderWord() {
   $('word-display').innerHTML = S.isDrawer 
     ? word.toUpperCase().split('').join(' ') 
     : word.split('').map((c,i) => S.revealedIdx.includes(i) ? c.toUpperCase() : '_').join(' ');
-  $('word-meta').textContent = S.isDrawer ? `${word.length} letters` : `${word.length} letters`;
+  $('word-meta').textContent = S.isDrawer ? `You are drawing — ${word.length} letters` : `${word.length} letters`;
 }
 
 function startTimer() {
   S.timeLeft = S.drawTime; clearInterval(S.timerInt);
-  
-  // Timer shaking logic
-  const timerWrap = $('timer-ring-wrap');
-  
   S.timerInt = setInterval(() => {
     S.timeLeft--;
     $('timer-num').textContent = S.timeLeft;
     $('t-fg').style.strokeDashoffset = CIRC * (1 - (S.timeLeft/S.drawTime));
-    
-    // Shake and turn red under 30s
-    if (S.timeLeft <= 30) {
-      $('timer-num').style.color = 'var(--red)';
-      $('t-fg').style.stroke = 'var(--red)';
-      timerWrap.style.animation = 'shake 0.5s infinite';
-    } else {
-      $('timer-num').style.color = 'var(--blue)';
-      $('t-fg').style.stroke = 'var(--blue)';
-      timerWrap.style.animation = 'none';
-    }
     
     if(!S.isDrawer && S.timeLeft === Math.floor(S.drawTime*0.5)) revealHint();
     if(!S.isDrawer && S.timeLeft === Math.floor(S.drawTime*0.25)) revealHint();
@@ -215,14 +177,9 @@ function revealHint() {
   if(unrev.length > 1) { S.revealedIdx.push(unrev[Math.floor(Math.random()*unrev.length)]); renderWord(); }
 }
 
-/* ================================================================
-   CHAT ENGINE & GUESSING (Skribbl.io Rules)
-================================================================ */
-function handleGuess() {
-  const input = $('chat-input');
-  let val = input.value.trim(); 
-  if(!val) return; 
-  input.value = '';
+/* ── CHAT ENGINE ── */
+function handleGuess(val) {
+  val = val.trim(); if(!val) return; $('chat-input').value = '';
   
   if(S.isDrawer || S.guessedIds.has(S.myId)) { 
     appendChat('msg-normal', `<b>${S.playerName}:</b> ${escHtml(val)}`); 
@@ -235,7 +192,6 @@ function handleGuess() {
     const pts = Math.max(10, Math.floor((S.timeLeft/S.drawTime)*100));
     S.players[0].score += pts; S.players[0].guessed = true; S.guessedIds.add(S.myId);
     appendChat('msg-correct', `${S.playerName} guessed the word!`);
-    sysToast(`✅ You guessed the word!`);
     buildLeaderboard();
     if(S.players.filter(p=>!p.isDrawer).every(p=>p.guessed)) endTurn(true);
   } else if (guess.length === ans.length && guess.split('').filter((c,i)=>c!==ans[i]).length === 1) {
@@ -251,23 +207,18 @@ function appendChat(cls, html) {
   c.scrollTop = c.scrollHeight;
 }
 
-function sysToast(msg) {
-  const tc = $('sys-toast-container');
-  const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg;
-  tc.appendChild(t);
+function popToast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  $('toast-container').appendChild(t);
   setTimeout(() => { t.classList.add('fade-out'); setTimeout(()=>t.remove(),300); }, 3000);
 }
 
-/* ================================================================
-   ROUND END & BOT SIMULATION
-================================================================ */
+/* ── ROUND & BOT LOGIC ── */
 function endTurn(allGuessed) {
   clearInterval(S.timerInt);
-  $('timer-ring-wrap').style.animation = 'none';
-  
   $('overlay-round-end').classList.remove('hidden');
   $('re-word-val').textContent = S.currentWord;
-  $('re-scores').innerHTML = S.players.map(p => `<div class="re-score-row"><span>${p.name}</span><span>+${p.guessed ? Math.max(10, Math.floor((S.timeLeft/S.drawTime)*100)) : 0} pts</span></div>`).join('');
+  $('re-scores').innerHTML = S.players.map(p => `<div class="re-score-row"><span>${p.name}</span><span>+${p.score} pts</span></div>`).join('');
   
   setTimeout(() => {
     $('overlay-round-end').classList.add('hidden');
@@ -281,7 +232,7 @@ function endTurn(allGuessed) {
 function gameOver() {
   $('overlay-podium').classList.remove('hidden');
   const sorted = [...S.players].sort((a,b)=>b.score-a.score);
-  $('podium-stand').innerHTML = sorted.slice(0,3).map((p,i) => `<h3>${i===0?'🥇':i===1?'🥈':'🥉'} ${p.name} (${p.score} pts)</h3>`).join('');
+  $('podium-stand').innerHTML = sorted.slice(0,3).map((p,i) => `<h3>${i+1}. ${p.name} (${p.score} pts)</h3>`).join('');
   fireConfetti();
 }
 
@@ -293,51 +244,13 @@ function scheduleBots() {
         bot.score += 40; bot.guessed = true; S.guessedIds.add(bot.id);
         appendChat('msg-correct', `${bot.name} guessed the word!`); buildLeaderboard();
       } else {
-        appendChat('msg-normal', `<b>${bot.name}:</b> ${['dog','cat','car','house','tree'][Math.floor(Math.random()*5)]}`);
+        appendChat('msg-normal', `<b>${bot.name}:</b> ${['dog','cat','car','house'][Math.floor(Math.random()*4)]}`);
       }
     }, 5000 + idx*4000 + Math.random()*5000);
   });
 }
 
-/* ================================================================
-   MODERATION & CONTEXT MENU
-================================================================ */
-window.openContext = function(id) {
-  const p = S.players.find(x => x.id === id);
-  if(!p) return;
-  S.ctxTarget = p;
-  $('ctx-name').textContent = p.name;
-  
-  const c = document.createElement('canvas'); c.width = 34; c.height = 34; drawAvatar(c, p.avatarDef, 34);
-  $('ctx-av').innerHTML = ''; $('ctx-av').appendChild(c);
-  
-  $('context-menu').classList.remove('hidden');
-  // Position roughly center
-  $('context-menu').style.top = '40%'; $('context-menu').style.left = '50%';
-  $('context-menu').style.transform = 'translate(-50%, -50%)';
-}
-
-$('ctx-close').onclick = () => $('context-menu').classList.add('hidden');
-$('ctx-mute').onclick = () => { sysToast(`🔇 Muted ${S.ctxTarget.name}`); $('context-menu').classList.add('hidden'); };
-$('ctx-report').onclick = () => { sysToast(`🚩 Reported ${S.ctxTarget.name}`); $('context-menu').classList.add('hidden'); };
-$('ctx-kick').onclick = () => { 
-  $('context-menu').classList.add('hidden');
-  $('vote-banner').classList.remove('hidden');
-};
-
-$('btn-vote-yes').onclick = () => {
-  $('vote-banner').classList.add('hidden');
-  if(S.ctxTarget) {
-    sysToast(`🚪 ${S.ctxTarget.name} was kicked!`);
-    S.players = S.players.filter(p => p.id !== S.ctxTarget.id);
-    buildLeaderboard();
-  }
-};
-$('btn-vote-no').onclick = () => $('vote-banner').classList.add('hidden');
-
-/* ================================================================
-   PURE HD CANVAS & TOOLBAR
-================================================================ */
+/* ── CANVAS & TOOLBAR ── */
 function initCanvas() {
   const c = $('game-canvas'); const ctx = c.getContext('2d', { willReadFrequently: true });
   
@@ -356,7 +269,7 @@ function initCanvas() {
       temp.getContext('2d').putImageData(snap, 0, 0); ctx.drawImage(temp, 0, 0, r.width, r.height);
     }
   };
-  window.addEventListener('resize', resize); setTimeout(resize, 100);
+  window.addEventListener('resize', resize); resize();
 
   const getPos = (e) => {
     const r = c.getBoundingClientRect();
@@ -466,7 +379,7 @@ function escHtml(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;
 function fireConfetti() {
   const canvas = $('confetti-canvas'); const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const pieces = Array.from({length:200}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height, w:Math.random()*10+5, h:Math.random()*10+5, dx:Math.random()*4-2, dy:Math.random()*5+3, c:COLORS[Math.floor(Math.random()*COLORS.length)]}));
+  const pieces = Array.from({length:150}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height, w:Math.random()*10+5, h:Math.random()*10+5, dx:Math.random()*4-2, dy:Math.random()*5+2, c:COLORS[Math.floor(Math.random()*COLORS.length)]}));
   function render() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     pieces.forEach(p => { ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.w, p.h); p.x+=p.dx; p.y+=p.dy; if(p.y > canvas.height) p.y = -10; });
@@ -475,6 +388,6 @@ function fireConfetti() {
   render();
 }
 
-// Initial Call
+// Initialize setup
 buildAvDots();
 setAvatar(0);

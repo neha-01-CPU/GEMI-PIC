@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
   <title>Picazo — Sketch It. Guess It. Win It.</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Righteous&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -97,7 +97,7 @@
       <div class="grid-top">
         <header class="game-header glass">
           <div class="hdr-timer-zone">
-            <div class="timer-ring-wrap" id="timer-ring-wrap">
+            <div class="timer-ring-wrap">
               <svg class="timer-svg" viewBox="0 0 60 60">
                 <circle class="t-bg" cx="30" cy="30" r="25"/>
                 <circle class="t-fg" id="t-fg" cx="30" cy="30" r="25" stroke-dasharray="157.08"/>
@@ -200,6 +200,8 @@
       </div>
 
     </div> <div class="sys-toast-container" id="sys-toast-container"></div>
+
+    <div class="toast-container" id="toast-container"></div>
     
     <div class="context-menu glass-strong hidden" id="context-menu">
       <div class="ctx-head" id="ctx-head">
@@ -207,8 +209,8 @@
         <div><div class="ctx-name" id="ctx-name">Player</div></div>
       </div>
       <button class="ctx-btn ctx-danger" id="ctx-kick">Kick Player</button>
-      <button class="ctx-btn" id="ctx-report">Report Player</button>
-      <button class="ctx-btn" id="ctx-mute">Mute Player</button>
+      <button class="ctx-btn" id="ctx-report">Report</button>
+      <button class="ctx-btn" id="ctx-mute">Mute</button>
       <button class="ctx-btn ctx-close" id="ctx-close">Cancel</button>
     </div>
     

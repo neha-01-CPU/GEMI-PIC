@@ -1,6 +1,6 @@
 /* ================================================================
-   PICAZO V9 FINAL — script.js
-   Warm Sunset Aesthetic · Pure HD Canvas · Skribbl.io Engine
+   PICAZO V8 FINAL — script.js
+   Pure HD Canvas · Skribbl.io Engine · Bouncy Popups
 ================================================================ */
 'use strict';
 
@@ -13,19 +13,19 @@ const S = {
   revealedIdx: [], guessedIds: new Set(),
   timeLeft: 100, timerInt: null, isDrawer: false, isDrawing: false,
   tool: 'pencil', color: '#000000', size: 3, strokes: [], 
-  dpr: window.devicePixelRatio || 1, isMuted: false, avatarIdx: 0
+  dpr: window.devicePixelRatio || 1, isMuted: false
 };
 
-const WORDS = ['sunset','galaxy','volcano','astronaut','pyramid','butterfly','telescope','octopus','elephant','rainbow'];
-const COLORS = ['#000000','#ffffff','#c0c0c0','#808080','#ff0844','#ffb199','#f4b942','#ffff00','#2ecc87','#00ffcc','#2575fc','#6a11cb','#ff00ff','#fbc2eb','#8b4513'];
+const WORDS = ['elephant','pizza','rainbow','submarine','telescope','butterfly','volcano','astronaut','octopus','galaxy','pyramid'];
+const COLORS = ['#000000','#ffffff','#c0c0c0','#808080','#ff0000','#ff6600','#ffcc00','#ffff00','#00cc00','#00ffcc','#0088ff','#0000ff','#8800ff','#ff00ff','#ff6699','#8b4513'];
 
-// Abstract Vector Avatars (Sunset Theme)
+// Abstract Vector Avatars (Sunset/Twilight Aesthetic)
 const AVATAR_DEFS = [
-  { name: 'Alpha', bg: '#ff9a9e', shape: 'circle', eye: '#ffffff', detail: '#ff0844' },
-  { name: 'Beta',  bg: '#a18cd1', shape: 'rect',   eye: '#ffffff', detail: '#6a11cb' },
-  { name: 'Gamma', bg: '#fbc2eb', shape: 'tri',    eye: '#ffffff', detail: '#a18cd1' },
-  { name: 'Delta', bg: '#84fab0', shape: 'circle', eye: '#ffffff', detail: '#2ecc87' },
-  { name: 'Epsilon',bg:'#8fd3f4', shape: 'rect',   eye: '#ffffff', detail: '#2575fc' }
+  { name: 'Alpha', bg: '#ff9a9e', shape: 'circle', eye: '#fff', detail: '#ff007f' },
+  { name: 'Beta',  bg: '#a18cd1', shape: 'rect',   eye: '#fff', detail: '#7f00ff' },
+  { name: 'Gamma', bg: '#fbc2eb', shape: 'tri',    eye: '#fff', detail: '#a18cd1' },
+  { name: 'Delta', bg: '#84fab0', shape: 'circle', eye: '#fff', detail: '#00ff7f' },
+  { name: 'Epsilon',bg:'#8fd3f4', shape: 'rect',   eye: '#fff', detail: '#007fff' }
 ];
 
 const CIRC = 2 * Math.PI * 25;
@@ -39,30 +39,26 @@ function drawAvatar(canvas, def, size = 96) {
   const W = size, H = size;
   c.clearRect(0, 0, W, H);
 
-  // Gradient Background
+  // Glass Background
   const bg = c.createLinearGradient(0, 0, W, H);
   bg.addColorStop(0, def.bg); bg.addColorStop(1, def.detail);
   c.fillStyle = bg;
-  c.beginPath(); if(c.roundRect) c.roundRect(0, 0, W, H, W * 0.25); else c.rect(0,0,W,H); c.fill();
+  c.beginPath(); if(c.roundRect) c.roundRect(0, 0, W, H, W * 0.2); else c.rect(0,0,W,H); c.fill();
 
   const cx = W / 2, cy = H / 2;
   
   // Abstract Inner Shape
-  c.fillStyle = 'rgba(255,255,255,0.35)';
+  c.fillStyle = 'rgba(255,255,255,0.4)';
   c.beginPath();
-  if (def.shape === 'circle') {
-    c.arc(cx, cy, W*0.3, 0, Math.PI*2);
-  } else if (def.shape === 'rect') { 
-    if(c.roundRect) c.roundRect(cx - W*0.25, cy - W*0.25, W*0.5, W*0.5, 10); else c.rect(cx - W*0.25, cy - W*0.25, W*0.5, W*0.5); 
-  } else if (def.shape === 'tri') { 
-    c.moveTo(cx, cy - W*0.3); c.lineTo(cx + W*0.3, cy + W*0.25); c.lineTo(cx - W*0.3, cy + W*0.25); 
-  }
+  if (def.shape === 'circle') c.arc(cx, cy, W*0.25, 0, Math.PI*2);
+  else if (def.shape === 'rect') { if(c.roundRect) c.roundRect(cx - W*0.2, cy - W*0.2, W*0.4, W*0.4, 8); else c.rect(cx - W*0.2, cy - W*0.2, W*0.4, W*0.4); }
+  else if (def.shape === 'tri') { c.moveTo(cx, cy - W*0.25); c.lineTo(cx + W*0.25, cy + W*0.2); c.lineTo(cx - W*0.25, cy + W*0.2); }
   c.fill();
 
   // Abstract "Eyes"
   c.fillStyle = def.eye;
-  c.beginPath(); c.arc(cx - W*0.12, cy - W*0.05, W*0.06, 0, Math.PI*2); c.fill();
-  c.beginPath(); c.arc(cx + W*0.12, cy - W*0.05, W*0.06, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(cx - W*0.1, cy - W*0.05, W*0.05, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(cx + W*0.1, cy - W*0.05, W*0.05, 0, Math.PI*2); c.fill();
 }
 
 function buildAvDots() {
@@ -144,11 +140,11 @@ function buildPlayers() {
 
 function buildLeaderboard() {
   $('player-list').innerHTML = [...S.players].sort((a,b)=>b.score-a.score).map((p, i) => {
-    const c = document.createElement('canvas'); c.width = 30; c.height = 30; drawAvatar(c, p.avatarDef, 30);
+    const c = document.createElement('canvas'); c.width = 28; c.height = 28; drawAvatar(c, p.avatarDef, 28);
     return `<li class="player-item ${p.id === S.players[S.drawerIdx].id ? 'drawing' : ''} ${p.guessed ? 'guessed' : ''}" onclick="if(!${p.isSelf}) openContext('${p.id}')">
       <div class="pi-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
       <div class="pi-av"><img src="${c.toDataURL()}" style="width:100%;height:100%"></div>
-      <div class="pi-name">${escHtml(p.name)}</div>
+      <div class="pi-name">${p.name}</div>
       <div class="pi-score">${p.score}</div>
       ${p.id === S.players[S.drawerIdx].id ? '✏️' : ''}
     </li>`;
@@ -160,7 +156,6 @@ function startRound() {
   S.isDrawer = S.players[S.drawerIdx].id === S.myId;
   buildLeaderboard();
   $('round-badge').textContent = `Round ${S.round}/${S.rounds}`;
-  $('timer-ring-wrap').classList.remove('danger');
   
   $('overlay-word-select').classList.remove('hidden');
   const choices = WORDS.sort(()=>Math.random()-0.5).slice(0,3);
@@ -189,24 +184,23 @@ function renderWord() {
 function startTimer() {
   S.timeLeft = S.drawTime; clearInterval(S.timerInt);
   
+  // Timer shaking logic
   const timerWrap = $('timer-ring-wrap');
-  const tNum = $('timer-num');
-  const tFg = $('t-fg');
   
   S.timerInt = setInterval(() => {
     S.timeLeft--;
-    tNum.textContent = S.timeLeft;
-    tFg.style.strokeDashoffset = CIRC * (1 - (S.timeLeft/S.drawTime));
+    $('timer-num').textContent = S.timeLeft;
+    $('t-fg').style.strokeDashoffset = CIRC * (1 - (S.timeLeft/S.drawTime));
     
     // Shake and turn red under 30s
     if (S.timeLeft <= 30) {
-      tNum.style.color = 'var(--red)';
-      tFg.style.stroke = 'var(--red)';
-      timerWrap.classList.add('danger');
+      $('timer-num').style.color = 'var(--red)';
+      $('t-fg').style.stroke = 'var(--red)';
+      timerWrap.style.animation = 'shake 0.5s infinite';
     } else {
-      tNum.style.color = 'var(--primary)';
-      tFg.style.stroke = 'var(--primary)';
-      timerWrap.classList.remove('danger');
+      $('timer-num').style.color = 'var(--blue)';
+      $('t-fg').style.stroke = 'var(--blue)';
+      timerWrap.style.animation = 'none';
     }
     
     if(!S.isDrawer && S.timeLeft === Math.floor(S.drawTime*0.5)) revealHint();
@@ -231,7 +225,7 @@ function handleGuess() {
   input.value = '';
   
   if(S.isDrawer || S.guessedIds.has(S.myId)) { 
-    appendChat('msg-normal', `<b>${escHtml(S.playerName)}:</b> ${escHtml(val)}`); 
+    appendChat('msg-normal', `<b>${S.playerName}:</b> ${escHtml(val)}`); 
     return; 
   }
   
@@ -240,14 +234,14 @@ function handleGuess() {
   if(guess === ans) {
     const pts = Math.max(10, Math.floor((S.timeLeft/S.drawTime)*100));
     S.players[0].score += pts; S.players[0].guessed = true; S.guessedIds.add(S.myId);
-    appendChat('msg-correct', `${escHtml(S.playerName)} guessed the word!`);
+    appendChat('msg-correct', `${S.playerName} guessed the word!`);
     sysToast(`✅ You guessed the word!`);
     buildLeaderboard();
     if(S.players.filter(p=>!p.isDrawer).every(p=>p.guessed)) endTurn(true);
   } else if (guess.length === ans.length && guess.split('').filter((c,i)=>c!==ans[i]).length === 1) {
     appendChat('msg-close', `'${escHtml(val)}' is very close!`);
   } else {
-    appendChat('msg-normal', `<b>${escHtml(S.playerName)}:</b> ${escHtml(val)}`);
+    appendChat('msg-normal', `<b>${S.playerName}:</b> ${escHtml(val)}`);
   }
 }
 
@@ -257,17 +251,8 @@ function appendChat(cls, html) {
   c.scrollTop = c.scrollHeight;
 }
 
-// Special Top Center Popup for System Events
 function sysToast(msg) {
   const tc = $('sys-toast-container');
-  const t = document.createElement('div'); t.className = 'sys-toast'; t.innerHTML = msg;
-  tc.appendChild(t);
-  setTimeout(() => { t.classList.add('fade-out'); setTimeout(()=>t.remove(),400); }, 3500);
-}
-
-// Bottom Popup for minor info
-function popToast(msg) {
-  const tc = $('toast-container');
   const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg;
   tc.appendChild(t);
   setTimeout(() => { t.classList.add('fade-out'); setTimeout(()=>t.remove(),300); }, 3000);
@@ -278,11 +263,11 @@ function popToast(msg) {
 ================================================================ */
 function endTurn(allGuessed) {
   clearInterval(S.timerInt);
-  $('timer-ring-wrap').classList.remove('danger');
+  $('timer-ring-wrap').style.animation = 'none';
   
   $('overlay-round-end').classList.remove('hidden');
   $('re-word-val').textContent = S.currentWord;
-  $('re-scores').innerHTML = S.players.map(p => `<div class="re-score-row"><span>${escHtml(p.name)}</span><span>+${p.guessed ? Math.max(10, Math.floor((S.timeLeft/S.drawTime)*100)) : 0} pts</span></div>`).join('');
+  $('re-scores').innerHTML = S.players.map(p => `<div class="re-score-row"><span>${p.name}</span><span>+${p.guessed ? Math.max(10, Math.floor((S.timeLeft/S.drawTime)*100)) : 0} pts</span></div>`).join('');
   
   setTimeout(() => {
     $('overlay-round-end').classList.add('hidden');
@@ -296,7 +281,7 @@ function endTurn(allGuessed) {
 function gameOver() {
   $('overlay-podium').classList.remove('hidden');
   const sorted = [...S.players].sort((a,b)=>b.score-a.score);
-  $('podium-stand').innerHTML = sorted.slice(0,3).map((p,i) => `<h3>${i===0?'🥇':i===1?'🥈':'🥉'} ${escHtml(p.name)} (${p.score} pts)</h3>`).join('');
+  $('podium-stand').innerHTML = sorted.slice(0,3).map((p,i) => `<h3>${i===0?'🥇':i===1?'🥈':'🥉'} ${p.name} (${p.score} pts)</h3>`).join('');
   fireConfetti();
 }
 
@@ -304,14 +289,11 @@ function scheduleBots() {
   S.players.filter(p => !p.isSelf && p.id !== S.players[S.drawerIdx]?.id).forEach((bot, idx) => {
     setTimeout(() => {
       if(!S.currentWord || bot.guessed) return;
-      if(S.timeLeft/S.drawTime < 0.6 && Math.random() < 0.4) {
+      if(S.timeLeft/S.drawTime < 0.5 && Math.random() < 0.4) {
         bot.score += 40; bot.guessed = true; S.guessedIds.add(bot.id);
-        appendChat('msg-correct', `${bot.name} guessed the word!`); 
-        sysToast(`✅ ${bot.name} guessed the word!`);
-        buildLeaderboard();
-        if(S.players.filter(p=>!p.isDrawer).every(p=>p.guessed)) endTurn(true);
+        appendChat('msg-correct', `${bot.name} guessed the word!`); buildLeaderboard();
       } else {
-        appendChat('msg-normal', `<b>${bot.name}:</b> ${['apple','sun','tree','house','star'][Math.floor(Math.random()*5)]}`);
+        appendChat('msg-normal', `<b>${bot.name}:</b> ${['dog','cat','car','house','tree'][Math.floor(Math.random()*5)]}`);
       }
     }, 5000 + idx*4000 + Math.random()*5000);
   });
@@ -326,10 +308,11 @@ window.openContext = function(id) {
   S.ctxTarget = p;
   $('ctx-name').textContent = p.name;
   
-  const c = document.createElement('canvas'); c.width = 38; c.height = 38; drawAvatar(c, p.avatarDef, 38);
+  const c = document.createElement('canvas'); c.width = 34; c.height = 34; drawAvatar(c, p.avatarDef, 34);
   $('ctx-av').innerHTML = ''; $('ctx-av').appendChild(c);
   
   $('context-menu').classList.remove('hidden');
+  // Position roughly center
   $('context-menu').style.top = '40%'; $('context-menu').style.left = '50%';
   $('context-menu').style.transform = 'translate(-50%, -50%)';
 }
@@ -339,7 +322,6 @@ $('ctx-mute').onclick = () => { sysToast(`🔇 Muted ${S.ctxTarget.name}`); $('c
 $('ctx-report').onclick = () => { sysToast(`🚩 Reported ${S.ctxTarget.name}`); $('context-menu').classList.add('hidden'); };
 $('ctx-kick').onclick = () => { 
   $('context-menu').classList.add('hidden');
-  sysToast(`🗳️ You voted to kick ${S.ctxTarget.name}`);
   $('vote-banner').classList.remove('hidden');
 };
 
@@ -480,13 +462,11 @@ function buildToolbar() {
 
 function escHtml(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]); }
 
-/* ================================================================
-   CONFETTI HTML5
-================================================================ */
+/* ── CONFETTI HTML5 ── */
 function fireConfetti() {
   const canvas = $('confetti-canvas'); const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const pieces = Array.from({length:250}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height, w:Math.random()*12+6, h:Math.random()*12+6, dx:Math.random()*6-3, dy:Math.random()*6+3, c:COLORS[Math.floor(Math.random()*COLORS.length)]}));
+  const pieces = Array.from({length:200}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height, w:Math.random()*10+5, h:Math.random()*10+5, dx:Math.random()*4-2, dy:Math.random()*5+3, c:COLORS[Math.floor(Math.random()*COLORS.length)]}));
   function render() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     pieces.forEach(p => { ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.w, p.h); p.x+=p.dx; p.y+=p.dy; if(p.y > canvas.height) p.y = -10; });
@@ -495,6 +475,6 @@ function fireConfetti() {
   render();
 }
 
-// Initial Setup
+// Initial Call
 buildAvDots();
 setAvatar(0);
